@@ -28,35 +28,28 @@ PeerOrgs:
   - Name: Hospital1
     Domain: hospital1.switch2logic.co.za
     Template:
-      Count: 4
-    Users:
-      Count: 1# 
-
-# ---------------------------------------------------------------------------
-# "OrdererOrgs" - Definition of organizations managing orderer nodes
-# ---------------------------------------------------------------------------
-OrdererOrgs:
-  # ---------------------------------------------------------------------------
-  # Orderer
-  # ---------------------------------------------------------------------------
-  - Name: Orderer
-    Domain: switch2logic.co.za
-    # ---------------------------------------------------------------------------
-    # "Specs" - See PeerOrgs below for complete description
-    # ---------------------------------------------------------------------------
-    Specs:
-      - Hostname: orderer
-
-# ---------------------------------------------------------------------------
-# "PeerOrgs" - Definition of organizations managing peer nodes
-# ---------------------------------------------------------------------------
-PeerOrgs:
-  # ---------------------------------------------------------------------------
-  # Hospital1
-  # ---------------------------------------------------------------------------
-  - Name: Hospital1
-    Domain: hospital1.switch2logic.co.za
-    Template:
       Count: 4 #number of peers
     Users:
-      Count: 1 #number of users
+      Count: 4 #number of users
+
+  # ---------------------------------------------------------------------------
+  # Hospital2
+  # ---------------------------------------------------------------------------
+  - Name: Hospital2
+    Domain: hospital2.switch2logic.co.za
+    Template:
+      Count: 4 
+    Users:
+      Count: 4 
+
+  # ---------------------------------------------------------------------------
+  # Hospital3
+  # ---------------------------------------------------------------------------
+  - Name: Hospital3
+    Domain: hospital3.switch2logic.co.za
+    Template:
+      Count: 4 
+    Users:
+      Count: 4     
+
+
