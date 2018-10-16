@@ -3,63 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
----
-################################################################################
-#
-#   Profile
-#
-#   - Different configuration profiles may be encoded here to be specified
-#   as parameters to the configtxgen tool
-#
-################################################################################
-Profiles:
-
-    SingleOrdererHospitalGenesis:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Orderer:
-            <<: *OrdererDefaults
-            Organizations:
-                - *OrdererOrg
-            Capabilities:
-                <<: *OrdererCapabilities               
-        Consortiums:
-            HospitalConsortium:
-                Organizations:
-                    - *Hospital1
-                    - *Hospital2
-                    - *Hospital3  
-    Comunity_Channel:
-        Consortium: HospitalConsortium
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *Hospital1
-                - *Hospital2
-                - *Hospital3 
-            Capabilities:
-                <<: *ApplicationCapabilities  
-    Hospital1_2Channel:
-        Consortium: HospitalConsortium
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *Hospital1
-                - *Hospital2
-            Capabilities:
-                <<: *ApplicationCapabilities
-    Hospital1_3_Channel:
-        Consortium: HospitalConsortium
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *Hospital1
-                - *Hospital3 
-            Capabilities:
-                <<: *ApplicationCapabilities                                               
-
-            
-
+---                                           
 ################################################################################
 #
 #   Section: Organizations
@@ -175,10 +119,64 @@ Capabilities:
         # determined to be desired for all orderers and peers running v1.0.x,
         # but the modification of which would cause incompatibilities.  Users
         # should leave this flag set to true.
-        V1_1: true
+        V1_2: true
 
     Orderer: &OrdererCapabilities
-        V1_1: true
+        V1_2: true
 
     Application: &ApplicationCapabilities
-        V1_1: true
+        V1_2: true
+
+ ################################################################################
+#
+#   Profile
+#
+#   - Different configuration profiles may be encoded here to be specified
+#   as parameters to the configtxgen tool
+#
+################################################################################
+Profiles:
+
+    SingleOrdererHospitalGenesis:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities               
+        Consortiums:
+            HospitalConsortium:
+                Organizations:
+                    - *Hospital1
+                    - *Hospital2
+                    - *Hospital3  
+    Comunity_channel:
+        Consortium: HospitalConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Hospital1
+                - *Hospital2
+                - *Hospital3 
+            Capabilities:
+                <<: *ApplicationCapabilities  
+    Hospital1_2_channel:
+        Consortium: HospitalConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Hospital1
+                - *Hospital2
+            Capabilities:
+                <<: *ApplicationCapabilities
+    Hospital1_3_channel:
+        Consortium: HospitalConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Hospital1
+                - *Hospital3 
+            Capabilities:
+                <<: *ApplicationCapabilities         
