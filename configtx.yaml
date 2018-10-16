@@ -119,13 +119,13 @@ Capabilities:
         # determined to be desired for all orderers and peers running v1.0.x,
         # but the modification of which would cause incompatibilities.  Users
         # should leave this flag set to true.
-        V1_2: true
+        V1_1: true
 
     Orderer: &OrdererCapabilities
-        V1_2: true
+        V1_1: true
 
     Application: &ApplicationCapabilities
-        V1_2: true
+        V1_1: true
 
  ################################################################################
 #
@@ -138,21 +138,17 @@ Capabilities:
 Profiles:
 
     SingleOrdererHospitalGenesis:
-        Capabilities:
-            <<: *ChannelCapabilities
         Orderer:
             <<: *OrdererDefaults
             Organizations:
                 - *OrdererOrg
-            Capabilities:
-                <<: *OrdererCapabilities               
         Consortiums:
             HospitalConsortium:
                 Organizations:
                     - *Hospital1
                     - *Hospital2
                     - *Hospital3  
-    Comunity_channel:
+    Comunitychannel:
         Consortium: HospitalConsortium
         Application:
             <<: *ApplicationDefaults
@@ -160,23 +156,18 @@ Profiles:
                 - *Hospital1
                 - *Hospital2
                 - *Hospital3 
-            Capabilities:
-                <<: *ApplicationCapabilities  
-    Hospital1_2_channel:
+    Hospital2channel:
         Consortium: HospitalConsortium
         Application:
             <<: *ApplicationDefaults
             Organizations:
                 - *Hospital1
                 - *Hospital2
-            Capabilities:
-                <<: *ApplicationCapabilities
-    Hospital1_3_channel:
+    Hospital3channel:
         Consortium: HospitalConsortium
         Application:
             <<: *ApplicationDefaults
             Organizations:
                 - *Hospital1
                 - *Hospital3 
-            Capabilities:
-                <<: *ApplicationCapabilities         
+     
