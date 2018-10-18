@@ -41,8 +41,9 @@ note: Please make sure the .sh file is excutable in the terminal.
 
 Step8: Create and join a channel and join peer 0 via fabric-client. <br />
 `$ docker exec -it cli bash`<br />
+CORE_PEER_LOCALMSPID=Hospital1MSP
 `$ export CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051`<br />
-`$ peer channel create -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./comunity_channel.tx --cafile tlsca.switch2logic.co.za-cert.pem` <br />
+`$ peer channel create -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./comunity_channel.tx --cafile  --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem` <br />
 peer channel create -o orderer.switch2logic.co.za:7050 -c hospital2channel -f ./hospital1_2_channel.tx
 peer channel create -o orderer.switch2logic.co.za:7050 -c hospital3channel -f ./hospital1_3_channel.tx
 
@@ -53,8 +54,14 @@ Step9: Join each peer to the channel <br />
 `$ export CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051`<br />
 `$ export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital1.switch2logic.co.za/users/Admin@hospital1.switch2logic.co.za/msp`<br />
 `$ peer channel fetch 0 comunitychannel.block --channelID comunitychannel --orderer orderer.switch2logic.co.za:7050`<br />
+`$ peer channel join -b comunitychannel.block`<br />
+peer channel fetch 0 hospital2channel.block --channelID hospital2channel --orderer orderer.switch2logic.co.za:7050
 `$ peer channel join -b hospital2channel.block`<br />
+peer channel fetch 0 hospital3channel.block --channelID hospital2channel --orderer orderer.switch2logic.co.za:7050
 `$ peer channel join -b hospital3channel.block`<br />
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f hospital2MSP_anchors.tx --cafile tlsca.switch2logic.co.za-cert.pem
+
 
 Step10: Check docker logs <br />
 `$ docker logs peer1.hospital1.switch2logic.co.za:7051 -f` <br />
@@ -63,3 +70,8 @@ Note: There should be no errors.
 # Lessons Learned
 If you want to get started with Hyperledger Fabric you need a firm understanding of docker.
 
+
+
+export CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f hospital1MSP_anchors.tx --cafile  --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem

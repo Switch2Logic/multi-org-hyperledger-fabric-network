@@ -48,7 +48,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.hospital1.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital1.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2399a5bba258f27ac4d47cb39987dffba958d5c0f3a59200755a52c5d05aba08_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/892cd9320cf8bca575408d13127d52b6f4e87ec78be94f19fd9634c2706cd5ea_sk
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
     ports:
       - "7054:7054"
@@ -147,7 +147,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME= ca.hospital2.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital2.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/011ed3bcff03439606e6b7e2945938c7540578eca7bc397f76fd6262685dd073_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/6e36077528aed0bd8317d834770d408aeb25cb6d31fff3ebd67eb5bdb5312d73_sk
     ports:
       - "8054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -245,7 +245,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.hospital3.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital3.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4c0cd03d82e0e84e7769adc76098e46e16f043fd4710855ff1869150eaa104e4_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/43335e85284584a6211ca17ef19f92baadbfdf32184f0cc37befb281c4536928_sk
     ports:
       - "9054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
