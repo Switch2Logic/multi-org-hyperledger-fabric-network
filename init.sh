@@ -51,8 +51,8 @@ if [ "$1" == "-di" ]; then
   deleteImages
 elif [ "$1" == "-dc" ]; then 
   deleteContainers
-elif [ "$1" == "-e" ]; then 
-  echo "test" 
+elif [ "$1" == "-v" ]; then 
+  docker volume prune
 else
   echo "no command selected..."  
 #  exit 1

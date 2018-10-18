@@ -25,6 +25,7 @@ services:
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer/msp
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
@@ -33,6 +34,8 @@ services:
         - ./channel-artifacts/:/etc/hyperledger/configtx
         - ./crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/:/etc/hyperledger/msp/orderer
         - ./crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/:/etc/hyperledger/msp/peerOrg1
+        - ./crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/:/etc/hyperledger/msp/peerOrg2
+        - ./crypto-config/peerOrganizations/hospital3.switch2logic.co.za/peers/peer0.hospital3.switch2logic.co.za/:/etc/hyperledger/msp/peerOrg3
     networks:
       - hospital-network
 
@@ -45,7 +48,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.hospital1.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital1.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/c08d73132d13057624b43feadba7c7c869526ba05b2b945ed8e3ee47d438e212_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/2399a5bba258f27ac4d47cb39987dffba958d5c0f3a59200755a52c5d05aba08_sk
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
     ports:
       - "7054:7054"
@@ -113,6 +116,7 @@ services:
     container_name: cli
     image: hyperledger/fabric-tools
     tty: true
+    stdin_open: true
     environment:
       - GOPATH=/opt/gopath
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -122,12 +126,15 @@ services:
       - CORE_PEER_LOCALMSPID=Hospital1MSP
       - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital1.switch2logic.co.za/users/Admin@hospital1.switch2logic.co.za/msp
       - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/tls/ca.crt
+
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
         - ./chaincode/:/opt/gopath/src/github.com/
-        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/        
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
     networks:
         - hospital-network
 
@@ -140,7 +147,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME= ca.hospital2.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital2.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/6d34848c62384994752c46a959a143ecb7f6be356e0d3a6726892162b89bb574_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/011ed3bcff03439606e6b7e2945938c7540578eca7bc397f76fd6262685dd073_sk
     ports:
       - "8054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -158,7 +165,7 @@ services:
       - CORE_PEER_ID=peer0.hospital2.switch2logic.co.za
       - CORE_LOGGING_PEER=debug
       - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_LOCALMSPID=Hospital1MSP
+      - CORE_PEER_LOCALMSPID=Hospital2MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_PEER_ADDRESS=peer0.hospital2.switch2logic.co.za:7051   
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hospital2.switch2logic.co.za:7051
@@ -202,6 +209,32 @@ services:
       - 6984:5984   
     networks:
       - hospital-network
+  cli2:
+    container_name: cli2
+    image: hyperledger/fabric-tools
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli2
+      - CORE_PEER_ADDRESS=peer0.hospital2.switch2logic.co.za:7051
+      - CORE_PEER_LOCALMSPID=Hospital2MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital2.switch2logic.co.za/users/Admin@hospital2.switch2logic.co.za/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/ca.crt
+
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
+    networks:
+        - hospital-network
+
 
 #---------------------------------------------------------------------------------------------------------------------------
 # Hospital3 Network Setup
@@ -212,7 +245,7 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.hospital3.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital3.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9f8c716a5b8cbed7d2fa72eb1d392ed0bc3b87f0d551395caa43b1e5afd60add_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4c0cd03d82e0e84e7769adc76098e46e16f043fd4710855ff1869150eaa104e4_sk
     ports:
       - "9054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -230,7 +263,7 @@ services:
       - CORE_PEER_ID=peer0.hospital3.switch2logic.co.za
       - CORE_LOGGING_PEER=debug
       - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
-      - CORE_PEER_LOCALMSPID=Hospital1MSP
+      - CORE_PEER_LOCALMSPID=Hospital3MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
       - CORE_PEER_ADDRESS=peer0.hospital3.switch2logic.co.za:7051   
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hospital3.switch2logic.co.za:7051
@@ -274,4 +307,29 @@ services:
       - 7984:5984   
     networks:
       - hospital-network
+  cli3:
+    container_name: cli3
+    image: hyperledger/fabric-tools
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli3
+      - CORE_PEER_ADDRESS=peer0.hospital3.switch2logic.co.za:7051
+      - CORE_PEER_LOCALMSPID=Hospital3MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital3.switch2logic.co.za/users/Admin@hospital3.switch2logic.co.za/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital3.switch2logic.co.za/peers/peer0.hospital3.switch2logic.co.za/tls/ca.crt
+
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
+    networks:
+        - hospital-network     
 

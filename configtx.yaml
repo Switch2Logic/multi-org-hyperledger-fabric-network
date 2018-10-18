@@ -28,69 +28,24 @@ Organizations:
         MSPDir: crypto-config/peerOrganizations/hospital1.switch2logic.co.za/msp
         AnchorPeers:
             - Host: peer0.hospital1.switch2logic.co.za
-              Port: 7051
+              Port: 7051    
 
     - &Hospital2
         Name: Hospital2MSP
         ID: Hospital2MSP
-        MSPDir: crypto-config/peerOrganizations/hospital3.switch2logic.co.za/msp
+        MSPDir: crypto-config/peerOrganizations/hospital2.switch2logic.co.za/msp
         AnchorPeers:
             - Host: peer0.hospital2.switch2logic.co.za
               Port: 7051
-
+             
     - &Hospital3
         Name: Hospital3MSP
         ID: Hospital3MSP
         MSPDir: crypto-config/peerOrganizations/hospital3.switch2logic.co.za/msp
         AnchorPeers:
             - Host: peer0.hospital3.switch2logic.co.za
-              Port: 7051          
+              Port: 7051  
 
-################################################################################
-#
-#   SECTION: Orderer
-#
-#   - This section defines the values to encode into a config transaction or
-#   genesis block for orderer related parameters
-#
-################################################################################
-Orderer: &OrdererDefaults
-
-    # Orderer Type: The orderer implementation to start
-    # Available types are "solo" and "kafka"
-    OrdererType: solo
-
-    Addresses:
-        - orderer.switch2logic.co.za:7050
-    BatchTimeout: 2s
-    BatchSize:
-        MaxMessageCount: 10
-        AbsoluteMaxBytes: 99 MB
-        PreferredMaxBytes: 512 KB
-
-    Kafka:
-        # Brokers: A list of Kafka brokers to which the orderer connects
-        # NOTE: Use IP:port notation
-        Brokers:
-            - 127.0.0.1:9092
-
-    # Organizations is the list of orgs which are defined as participants on
-    # the orderer side of the network
-    Organizations:
-
-################################################################################
-#
-#   SECTION: Application
-#
-#   - This section defines the values to encode into a config transaction or
-#   genesis block for application related parameters
-#
-################################################################################
-Application: &ApplicationDefaults
-
-    # Organizations is the list of orgs which are defined as participants on
-    # the application side of the network
-    Organizations:
 
 ################################################################################
 #
@@ -125,7 +80,53 @@ Capabilities:
         V1_1: true
 
     Application: &ApplicationCapabilities
-        V1_1: true
+        V1_2: true
+
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the application side of the network
+    Organizations:                     
+
+################################################################################
+#
+#   SECTION: Orderer
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for orderer related parameters
+#
+################################################################################
+Orderer: &OrdererDefaults
+
+    # Orderer Type: The orderer implementation to start
+    # Available types are "solo" and "kafka"
+    OrdererType: solo
+
+    Addresses:
+        - orderer.switch2logic.co.za:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        # Brokers: A list of Kafka brokers to which the orderer connects
+        # NOTE: Use IP:port notation
+        Brokers:
+            - 127.0.0.1:9092
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the orderer side of the network
+    Organizations:
 
  ################################################################################
 #
@@ -138,10 +139,14 @@ Capabilities:
 Profiles:
 
     SingleOrdererHospitalGenesis:
+        Capabilities:
+            <<: *ChannelCapabilities
         Orderer:
             <<: *OrdererDefaults
             Organizations:
                 - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
         Consortiums:
             HospitalConsortium:
                 Organizations:
@@ -156,6 +161,8 @@ Profiles:
                 - *Hospital1
                 - *Hospital2
                 - *Hospital3 
+            Capabilities:
+                <<: *ApplicationCapabilities      
     Hospital2channel:
         Consortium: HospitalConsortium
         Application:
@@ -163,6 +170,8 @@ Profiles:
             Organizations:
                 - *Hospital1
                 - *Hospital2
+            Capabilities:
+                <<: *ApplicationCapabilities      
     Hospital3channel:
         Consortium: HospitalConsortium
         Application:
@@ -170,4 +179,5 @@ Profiles:
             Organizations:
                 - *Hospital1
                 - *Hospital3 
-     
+            Capabilities:
+                <<: *ApplicationCapabilities    

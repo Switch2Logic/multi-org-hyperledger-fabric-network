@@ -27,6 +27,7 @@ PeerOrgs:
   # ---------------------------------------------------------------------------
   - Name: Hospital1
     Domain: hospital1.switch2logic.co.za
+    EnableNodeOUs: true
     Template:
       Count: 4 #number of peers
     Users:
@@ -37,6 +38,7 @@ PeerOrgs:
   # ---------------------------------------------------------------------------
   - Name: Hospital2
     Domain: hospital2.switch2logic.co.za
+    EnableNodeOUs: true
     Template:
       Count: 4 
     Users:
@@ -47,6 +49,7 @@ PeerOrgs:
   # ---------------------------------------------------------------------------
   - Name: Hospital3
     Domain: hospital3.switch2logic.co.za
+    EnableNodeOUs: true
     Template:
       Count: 4 
     Users:
