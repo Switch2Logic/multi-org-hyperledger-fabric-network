@@ -25,7 +25,7 @@ services:
       - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer/msp
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=multiorghyperledgerfabricnetwork_hospital-network
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     ports:
@@ -49,7 +49,7 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca.hospital1.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital1.switch2logic.co.za-cert.pem
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/892cd9320cf8bca575408d13127d52b6f4e87ec78be94f19fd9634c2706cd5ea_sk
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=multiorghyperledgerfabricnetwork_hospital-network
     ports:
       - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
@@ -74,7 +74,7 @@ services:
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=multiorghyperledgerfabricnetwork_hospital-network
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.hospital1.switch2logic.co.za:5984
       # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
@@ -132,7 +132,7 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
     networks:
@@ -172,7 +172,7 @@ services:
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=multiorghyperledgerfabricnetwork_hospital-network
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.hospital2.switch2logic.co.za:5984
       # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
@@ -229,7 +229,7 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
     networks:
@@ -270,7 +270,7 @@ services:
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=multiorghyperledgerfabricnetwork_hospital-network
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.hospital3.switch2logic.co.za:5984
       # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
@@ -327,7 +327,7 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/       
     networks:
