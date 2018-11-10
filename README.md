@@ -24,11 +24,13 @@ Step3: Verify hosts on Swarm<br />
 `$ docker node ls`
 
 Step4: Create a overlay network on first computer<br />
-`$ docker network create -d overlay --attachable network-name-go's-here`<br />
+`$ docker network create -d overlay --attachable hospital-network`<br />
 note: The name of the network I used is "rebnet" if you use a different name please make sure to propagate this change through the docker-compose.yaml files you use. I recommend doing a find and replace on the term "rebnet". 
 
+docker run -itd --name dummyContainer --net hospital-network alpine /bin/sh
+
 Step5: Connect second computer to overlay network<br />
-`$ docker run -itd --name dummyContainer --net "network-name-go's-here" alpine /bin/sh`<br />
+`$ docker run -itd --restart always --name dummyContainer --net "network-name-go's-here" alpine /bin/sh`<br />
 note: This is a work around to get the second computer to connect to the ovelay network.
 
 Step6: Copy the project folder to each computer.  <br />
@@ -36,15 +38,15 @@ note: The channel-artifacts and the crypto-config folders are the most important
 
 Step7: Start the network <br />
 `$ start-host1.sh` <br />
-`$ docker-compose -f docker-compose-local.yaml up -d` <br />
+`$ docker-compose -f docker-compose-locl.yaml up -d` <br />
 note: Please make sure the .sh file is excutable in the terminal. 
 
 Step8: Create and join a channel and join peer 0 via fabric-client. <br />
 `$ docker exec -it cli bash`<br />
 CORE_PEER_LOCALMSPID=Hospital1MSP
 `$ export CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051`<br />
-`$ peer channel create -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./comunity_channel.tx --cafile  --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem` <br />
-peer channel create -o orderer.switch2logic.co.za:7050 -c hospital2channel -f ./hospital1_2_channel.tx
+`$ peer channel create -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/comunity_channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem` <br />
+peer channel create -o orderer.switch2logic.co.za:7050 -c hospital2channel -f ./chan/hospital1_2_channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem`
 peer channel create -o orderer.switch2logic.co.za:7050 -c hospital3channel -f ./hospital1_3_channel.tx
 
 note: channel can only be created ones and will give an error if you recreate it just move on.
@@ -56,11 +58,25 @@ Step9: Join each peer to the channel <br />
 `$ peer channel fetch 0 comunitychannel.block --channelID comunitychannel --orderer orderer.switch2logic.co.za:7050`<br />
 `$ peer channel join -b comunitychannel.block`<br />
 peer channel fetch 0 hospital2channel.block --channelID hospital2channel --orderer orderer.switch2logic.co.za:7050
-`$ peer channel join -b hospital2channel.block`<br />
+`$ peer channel join -b /chan/hospital2channel.block`<br />
 peer channel fetch 0 hospital3channel.block --channelID hospital2channel --orderer orderer.switch2logic.co.za:7050
 `$ peer channel join -b hospital3channel.block`<br />
 
-peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f hospital2MSP_anchors.tx --cafile tlsca.switch2logic.co.za-cert.pem
+peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/hospital1MSP_anchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/hospital2MSP_anchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/hospital3MSP_anchors.tx --cafile tlsca.switch2logic.co.za-cert.pem
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c hospital2channel -f ./channel-artifacts/hospital1_2MSP_anchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c hospital2channel -f ./channel-artifacts/hospital2_1MSP_anchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c hospital3channel -f hospital1_3MSP_anchors.tx --cafile tlsca.switch2logic.co.za-cert.pem
+
+peer channel update -o orderer.switch2logic.co.za:7050 -c hospital3channel -f hospital3_1MSP_anchors.tx --cafile tlsca.switch2logic.co.za-cert.pem
 
 
 Step10: Check docker logs <br />
@@ -77,16 +93,32 @@ export CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051
 peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f hospital1MSP_anchors.tx --cafile  --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
 
 # Install Hyperleder Fabric chaincode via fabric-client
-`$ peer chaincode install -n fabcar -v 1.0 -p github.com/chaincode/` <br />
+`$ peer chaincode install -n fabcar -v 1.0 -p github.com/hyperledger/fabric/peer/chaincode/` <br />
 
 # List installed chaincode
 `$ peer chaincode list --installed` <br />
 
 # Instaniante chaincode
-`$ peer chaincode instantiate -o orderer.switch2logic.co.za:7050 --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C hospital2channel -n fabcar -v 2.0 -c '{"Args":["init"]}` <br />
+`$ peer chaincode instantiate -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C hospital2channel -n fabcar -v 1.0 -c '{"Args":["init"]}'` <br />
 
 peer chaincode instantiate -o orderer.switch2logic.co.za:7050 -n fabcar -v 1.0 -c '{"Args":["init"]}' -C hospital2channel
 
 # Query hyperledger-fabric chaincode
-`$ peer chaincode query -C rebelchannel -n fabcar -c '{"Args":["queryAllCars"]}'` <br />
-`$ peer chaincode invoke -o orderer.switch2logic.co.za:7050 --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C rebelchannel -n car  --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt -c '{"Args":["createCar","CAR11","VW","Polo","Black","TheNewCar"]}'` <br />
+`$ peer chaincode query -C comunitychannel -n fabcar -c '{"Args":["queryAllCars"]}'` <br />
+`$ peer chaincode invoke -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C hospital2channel -n fabcar  --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/ca.crt -c '{"Args":["createCar","CAR11","VW","Polo","Black","Channel1_2Car"]}'` <br />
+
+peer chaincode invoke -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C comunitychannel -n fabcar  --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/ca.crt -c '{"Args":["initLedger",""]}'
+
+
+
+Steps
+1. peer channel create -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/comunity_channel.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+2. peer channel join -b comunitychannel.block
+
+3. peer channel update -o orderer.switch2logic.co.za:7050 -c comunitychannel -f ./channel-artifacts/hospital1MSP_anchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+4. peer chaincode install -n fabcar -v 1.0 -p github.com/chaincode/
+
+5. peer chaincode instantiate -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C comutitychannel -n fabcar -v 1.0 -c '{"Args":["init"]}' "OR ('Hospital1MSP.peer','Hospital2MSP.peer')"
+

@@ -1,0 +1,118 @@
+#
+# Copyright IBM Corp All Rights Reserved
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+version: '3.2'
+
+networks:
+  hospital-network:
+    external: true
+
+
+services:
+
+#---------------------------------------------------------------------------------------------------------------------------
+# Hospital1 Network Setup
+#---------------------------------------------------------------------------------------------------------------------------
+  ca.hospital2.switch2logic.co.za:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_SERVER_CA_NAME=ca.hospital2.switch2logic.co.za
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric/ca
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric/ca/ca.hospital2.switch2logic.co.za-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric/ca/6e36077528aed0bd8317d834770d408aeb25cb6d31fff3ebd67eb5bdb5312d73_sk
+      #Network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./crypto-config/peerOrganizations/hospital2.switch2logic.co.za/ca/:/etc/hyperledger/fabric/ca   
+    container_name: ca.hospital2.switch2logic.co.za
+    networks:
+      - hospital-network
+    restart: always  
+
+  peer0.hospital2.switch2logic.co.za:
+    container_name: peer0.hospital2.switch2logic.co.za
+    image: hyperledger/fabric-peer
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ID=peer0.hospital2.switch2logic.co.za
+      - CORE_LOGGING_PEER=debug
+      - CORE_CHAINCODE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_LOCALMSPID=Hospital2MSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_ADDRESS=peer0.hospital2.switch2logic.co.za:7051   
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hospital2.switch2logic.co.za:7051
+      #TLS
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      #State Database Config
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.hospital2.switch2logic.co.za:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      #Network
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: peer node start
+    # command: peer node start --peer-chaincodedev=true
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls:/etc/hyperledger/fabric/tls
+       # - ./crypto-config/peerOrganizations/hospital2.switch2logic.co.za/users:/etc/hyperledger/msp/users 
+    networks:
+      - hospital-network
+    restart: always  
+
+  couchdb.peer0.hospital2.switch2logic.co.za:
+    container_name: couchdb.peer0.hospital2.switch2logic.co.za
+    image: hyperledger/fabric-couchdb
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 5984:5984   
+    networks:
+      - hospital-network
+    restart: always  
+
+  cli_hospital2:
+    container_name: cli
+    image: hyperledger/fabric-tools
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.hospital2.switch2logic.co.za:7051
+      - CORE_PEER_LOCALMSPID=Hospital2MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/users/Admin@hospital2.switch2logic.co.za/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/ca.crt
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/peerOrganizations/hospital2.switch2logic.co.za/peers/peer0.hospital2.switch2logic.co.za/tls/server.key
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/chaincode
+        - ./crypto-config/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts      
+    networks:
+        - hospital-network
+    restart: always          

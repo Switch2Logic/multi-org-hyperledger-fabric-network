@@ -19,26 +19,26 @@ services:
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_TLS_ENABLED=true
-      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/fabric/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/fabric/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/fabric/orderer/tls/ca.crt]
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/fabric/orderer/genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer/msp
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/fabric/orderer/msp
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
     hostname: orderer.switch2logic.co.za
     ports:
       - 7050:7050
     volumes:
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/channel-artifacts/:/etc/hyperledger/configtx
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/:/etc/hyperledger/msp/orderer
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/tls:/etc/hyperledger/msp/orderer/tls
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/channel-artifacts/:/etc/hyperledger/orderer/
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp:/etc/hyperledger/fabric/orderer/msp
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/tls/:/etc/hyperledger/fabric/orderer/tls
     deploy:
       replicas: 1
       placement:
         constraints:
-         - node.hostname == switch2logic.rebelchain.co.za   
+         - node.hostname == switch2logic.rebelchain.co.za 
     networks:
       hospital-network:  
         aliases:
@@ -50,17 +50,16 @@ services:
   ca:
     image: hyperledger/fabric-ca
     environment:
-      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server-config
       - FABRIC_CA_SERVER_CA_NAME=ca.switch2logic.co.za
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.hospital1.switch2logic.co.za-cert.pem
-      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/3591f4825c2bb028333e97b4526836fefe648a3b34cb4e2a770c6859996aecec_sk
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/892cd9320cf8bca575408d13127d52b6f4e87ec78be94f19fd9634c2706cd5ea_sk
     hostname: ca.switch2logic.co.za
     ports:
       - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
-      - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/ca/:/etc/hyperledger/fabric-ca-server-config     
-    #container_name: ca.switch2logic.co.za
+        - /home/switch2logic/project/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/ca/:/etc/hyperledger/fabric-ca-server-config       #container_name: ca.switch2logic.co.za
     deploy:
       replicas: 1
       placement:
@@ -87,18 +86,15 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       - CORE_PEER_LOCALMSPID=Hospital1MSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
-      - CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.hospital1.switch2logic.co.za:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.hospital1.switch2logic.co.za:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer3.hospital1.switch2logic.co.za:7051     
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051  
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.hospital1.switch2logic.co.za:7051
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbpeer0:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
     # command: peer node start --peer-chaincodedev=true
     hostname: peer0.hospital1.switch2logic.co.za
@@ -107,12 +103,10 @@ services:
       - 7053:7053
     volumes:
         - /var/run/:/host/var/run/
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/msp:/etc/hyperledger/msp/peer
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/tls:/etc/hyperledger/fabric/tls
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/users:/etc/hyperledger/msp/users
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/channel-artifacts:/etc/hyperledger/configtx
-    depends_on:
-      - couchdbpeer0
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/msp:/etc/hyperledger/fabric/msp/peer
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/tls:/etc/hyperledger/fabric/tls
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/users:/etc/hyperledger/fabric/msp/users
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/channel-artifacts:/etc/hyperledger/fabric/configtx
     deploy:
       replicas: 1
       placement:
@@ -130,7 +124,7 @@ services:
       - COUCHDB_USER=
       - COUCHDB_PASSWORD=
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hospital-network
-    hostname: couchdbpeer0  
+    hostname: couchdbpeer0
     ports:
       - 5984:5984
     deploy:
@@ -143,7 +137,7 @@ services:
         aliases:
           - couchdbpeer0
 
-  cli:
+  cli_hospital1:
     #container_name: cli
     image: hyperledger/fabric-tools
     tty: true
@@ -155,32 +149,33 @@ services:
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
-      - CORE_PEER_ID=cli
+      - CORE_PEER_ID=cli_hospital1
       - CORE_PEER_ADDRESS=peer0.hospital1.switch2logic.co.za:7051
       - CORE_PEER_LOCALMSPID=Hospital1MSP
       - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hospital1.switch2logic.co.za/users/Admin@hospital1.switch2logic.co.za/msp
       - CORE_CHAINCODE_KEEPALIVE=10
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    hostname: cli
+    hostname: cli_hospital1
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/tls:/etc/hyperledger/fabric/tls
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/chaincode/:/opt/gopath/src/github.com/
-        - /home/switch2logic/Documents/github/hyperledger/frist-fabric-network-setup/hyperledger-fabric/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config/peerOrganizations/hospital1.switch2logic.co.za/peers/peer0.hospital1.switch2logic.co.za/tls:/etc/hyperledger/fabric/tls
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/chaincode/:/opt/gopath/src/github.com/chaincode
+        - /home/switch2logic/project/multi-org-hyperledger-fabric-network/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
     deploy:
       replicas: 1
       placement:
         constraints:
-         - node.hostname == rebelsoft.rebelchain.co.za      
+         - node.hostname == switch2logic.rebelchain.co.za      
     networks:
       hospital-network:  
         aliases:
-          - cli
+          - cli_hospital1
 
 #---------------------------------------------------------------------------------------------------------------------------
 # Hospital2 Network Setup
 #---------------------------------------------------------------------------------------------------------------------------
+
 
 #---------------------------------------------------------------------------------------------------------------------------
 # Hospital3 Network Setup
