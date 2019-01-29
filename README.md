@@ -122,3 +122,8 @@ Steps
 
 5. peer chaincode instantiate -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C comutitychannel -n fabcar -v 1.0 -c '{"Args":["init"]}' "OR ('Hospital1MSP.peer','Hospital2MSP.peer')"
 
+peer chaincode upgrade -n patient -p /opt/gopath/src/github.com/hyperledger/fabric/peer/chaincode/ -v 2 -c '{"Args":["init"]}' -C hospital2channel --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem
+
+peer chaincode upgrade -o orderer.switch2logic.co.za:7050 -C hospital2channel --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem  -n patient -p /opt/gopath/src/github.com/chaincode/ -v 2 -c '{"Args":["init"]}' 
+
+peer chaincode upgrade -o orderer.switch2logic.co.za:7050 --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto-config/ordererOrganizations/switch2logic.co.za/orderers/orderer.switch2logic.co.za/msp/tlscacerts/tlsca.switch2logic.co.za-cert.pem -C hospital2channel -n patient -v 1.1 -c '{"Args":["init"]}' -P "OR ('Hospital1MSP.peer','Hospital2MSP.peer')"
